@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Loleczkowo Video System</title>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;}
+
+        body{
+            font-family:Arial, sans-serif;
+            background:#f2f2f2;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+        .container{
+            background:#fff;
+            width:320px;
+            padding:20px;
+            border-radius:8px;
+            box-shadow:0 0 10px rgba(0,0,0,.1);
+        }
+        h2{text-align:center;}
+
+        input[type="text"],
+        input[type="password"]{
+            width:100%;
+            padding:10px;
+            margin:8px 0;
+            border:1px solid #ccc;
+            border-radius:4px;
+        }
+        .password-field{position:relative;}
+        .toggle-password{
+            position:absolute;
+            right:10px;
+            top:50%;
+            transform:translateY(-50%);
+            font-size:12px;
+            cursor:pointer;
+            color:#555;
+            user-select:none;
+        }
+
+        button{
+            width:100%;
+            padding:10px;
+            border:none;
+            border-radius:4px;
+            background:#4CAF50;
+            color:#fff;
+            cursor:pointer;
+        }
+        button:hover{background:#45a049;}
+
+        .error{color:red;text-align:center;}
+        .link{text-align:center;margin-top:10px;}
+        .link a{color:#4CAF50;text-decoration:none;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+
+        <form id="loginForm">
+            <input type="text" name="identifier" placeholder="Gmail or Nickname" required>
+
+            <div class="password-field">
+                <input type="password" name="password" id="passwordInput" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePassword()">Show</span>
+            </div>
+
+            <button type="submit">Log in</button>
+            <p class="error" id="errorMsg"></p>
+        </form>
+
+        <div class="link">
+            <p>Need an account? <a href="signup.html">Sign up</a></p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(){
+            const input=document.getElementById('passwordInput');
+            const toggle=document.querySelector('.toggle-password');
+            if(input.type==='password'){
+                input.type='text';
+                toggle.textContent='Hide';
+            }else{
+                input.type='password';
+                toggle.textContent='Show';
+            }
+        }
+    </script>
+</body>
+</html>
