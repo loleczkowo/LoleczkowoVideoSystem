@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session Test</title>
+</head>
+<body>
+  <script>
+    async function testConnection() {
+      try {
+        const response = await fetch('/api/test-connection', {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (data.result === "VALID_SESSION") {
+          console.log("Session valid:", data.user);
+        } else {
+          window.location.href = "verification/login.html";
+        }
+      } catch (err) {
+        console.error("Connection error:", err);
+        window.location.href = "verification/login.html";
+      }
+    }
+
+    testConnection();
+  </script>
+</body>
+</html>

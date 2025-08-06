@@ -1,0 +1,11 @@
+LOGIN PASS RULES:
+Password at least 5 characters
+Username at least 3 characters
+Username can only contain letters, numbers, and "_"
+Password can contain letters big and small, numbers and special characters.
+Password HAS to contain at least one letter and one number and one special character
+Display_name can contain any characters, but must be at least 3 characters long.
+Max lens: 
+Username 25 characters
+Password 64 characters
+Display_name 25 characters

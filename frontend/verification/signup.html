@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up – Loleczkowo Video System</title>
+
+    <!-- Shared stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h2>Create Account</h2>
+
+    <form id="signupForm" autocomplete="off">
+        <!-- NICKNAME ---------------------------------------------------- -->
+        <input type="text" name="nickname" id="nicknameInput"
+                placeholder="Nickname"
+                minlength="3" maxlength="25" required>
+        <div class="field-msg" id="nicknameMsg"></div>
+
+        <!-- DISPLAY NAME ------------------------------------------------ -->
+        <input  type="text" name="display_name" id="displayNameInput"
+                placeholder="Display name"
+                minlength="3" maxlength="25" required>
+        <div class="field-msg" id="displayNameMsg"></div>
+
+        <!-- E-MAIL (any domain) ---------------------------------------- -->
+        <input  type="email" name="email" id="emailInput"
+                placeholder="Email address (you@example.com)" required>
+        <div class="field-msg" id="emailMsg"></div>
+
+        <!-- PASSWORD + CONFIRM ----------------------------------------- -->
+        <div class="password-field">
+            <input type="password" name="password" id="signupPassword"
+                   placeholder="Password" minlength="5" maxlength="64" required>
+            <span class="toggle-password"
+                  onclick="togglePassword('signupPassword',this)">Show</span>
+        </div>
+        <div class="field-msg" id="passwordMsg"></div>
+
+        <div class="password-field">
+            <input type="password" name="confirm" id="confirmPassword"
+                   placeholder="Confirm password" minlength="5" maxlength="64" required>
+            <span class="toggle-password"
+                  onclick="togglePassword('confirmPassword',this)">Show</span>
+        </div>
+        <div class="field-msg" id="confirmMsg"></div>
+
+        <button type="submit">Sign up</button>
+        <p class="success" id="signupSuccess"></p>
+    </form>
+
+    <div class="link">
+        <p>Already have an account? <a href="login.html">Log in</a></p>
+    </div>
+</div>
+
+<script>
+/* ---------- helpers -------------------------------------------------- */
+function togglePassword(id, el){
+    const inp = document.getElementById(id);
+    inp.type = (inp.type==='password') ? 'text' : 'password';
+    el.textContent = (inp.type==='password') ? 'Show' : 'Hide';
+}
+function show(id, msgs){          // render multi-line hints
+    document.getElementById(id).innerHTML = msgs.join('<br>');
+}
+
+/* ---------- validators ---------------------------------------------- */
+function nicknameErrors(n){
+    const errs=[];
+    if(n.length<3) errs.push('At least 3 characters.');
+    if(n.length>25) errs.push('No more than 25 characters.');
+    if(!/^[A-Za-z0-9_]+$/.test(n))
+        errs.push('Letters, numbers and “_” only.');
+    return errs;
+}
+function displayNameErrors(d){
+    const errs=[];
+    if(d.length<3)  errs.push('At least 3 characters.');
+    if(d.length>25) errs.push('No more than 25 characters.');
+    return errs;
+}
+function emailErrors(e){
+    const ok = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e);
+    return ok ? [] : ['Enter a valid e-mail address.'];
+}
+function passwordErrors(p){
+    const errs=[];
+    if(p.length<5)  errs.push('At least 5 characters.');
+    if(p.length>64) errs.push('No more than 64 characters.');
+    if(!/[A-Z]/.test(p))          errs.push('Add an uppercase letter.');
+    if(!/\d/.test(p))             errs.push('Add a number.');
+    if(!/[^A-Za-z0-9]/.test(p))   errs.push('Add a special character.');
+    return errs;
+}
+
+/* ---------- live validation ------------------------------------------ */
+['nicknameInput','displayNameInput','emailInput','signupPassword']
+.forEach(id=>document.getElementById(id).addEventListener('input',liveCheck));
+
+function liveCheck(){
+    show('nicknameMsg', nicknameErrors(nicknameInput.value.trim()));
+    show('displayNameMsg', displayNameErrors(displayNameInput.value.trim()));
+    show('emailMsg', emailErrors(emailInput.value.trim()));
+    show('passwordMsg', passwordErrors(signupPassword.value));
+}
+
+/* ---------- form submit ---------------------------------------------- */
+signupForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    liveCheck();                                  // refresh messages first
+
+    const confirmErrs = (signupPassword.value!==confirmPassword.value)
+                        ? ['Passwords do not match.'] : [];
+    show('confirmMsg', confirmErrs);
+
+    // Stop if ANY error div has content
+    const invalid = [...document.querySelectorAll('.field-msg')]
+                    .some(div=>div.textContent.trim()!=='');
+    if(invalid) return;
+
+    signupSuccess.textContent='Account request sent';
+    /* real request example:
+    fetch('/api/signup', {method:'POST',body:new FormData(signupForm)})
+         .then(r=>r.json()).then(...) */
+});
+</script>
+<script>
+signupForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    liveCheck();                                     // re-run validators
+    if ([...document.querySelectorAll('.field-msg')]
+            .some(d => d.textContent)) return;       // abort on any error
+
+    try {
+        const r = await fetch('/api/signup', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                nickname:      nicknameInput.value.trim(),
+                display_name:  displayNameInput.value.trim(),
+                email:         emailInput.value.trim(),
+                password:      signupPassword.value
+            })
+        });
+        if (r.ok) {
+            signupSuccess.textContent = 'Account created! You can now log in.';
+            signupForm.reset();
+        } else {
+            const msg = (await r.json()).detail;
+            if (msg === 'NICKNAME_OR_EMAIL_TAKEN')
+                emailMsg.textContent = 'Nickname or e-mail already taken.';
+        }
+    } catch (e) {
+        signupSuccess.textContent = 'Server error, please try later. ERROR: ' + e.message;
+    }
+});
+</script>
+</body>
+</html>

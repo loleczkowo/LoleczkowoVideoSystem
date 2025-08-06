@@ -1,0 +1,53 @@
+import hashlib
+from datetime import datetime, timezone
+from fastapi import HTTPException, status, Request
+from sqlalchemy import select, update
+from app.db import AsyncSessionLocal
+from app.models import Connection, User
+from logging_sys import logger
+
+
+async def _hash(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+async def check_session(request: Request) -> int:
+    raw_token = request.cookies.get("lvs_token")
+
+    token_hash = await _hash(raw_token)
+
+    async with AsyncSessionLocal() as db:
+        res = await db.execute(
+            select(Connection.user_id).where(
+                Connection.token_hash == token_hash)
+        )
+        row = res.first()
+        if row is None:
+            logger.debug("session invalid")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="invalid session")
+
+        user_id = row[0]
+
+        await db.execute(
+            update(Connection)
+            .where(Connection.token_hash == token_hash)
+            .values(last_used=datetime.now(timezone.utc))
+        )
+        await db.commit()
+        logger.debug(f"session found, user: {user_id}")
+        return user_id
+
+
+async def is_mod(user_id: int) -> bool:
+    async with AsyncSessionLocal() as db:
+        res = await db.execute(
+            select(User.is_mod).where(User.id == user_id)
+        )
+        return bool(res.scalar())
+
+
+async def check_mod(uid):
+    if not await is_mod(uid):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="moderator perms required")
