@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from app.db import AsyncSessionLocal
 from app.models import User
 from logging_sys import logger
-from session_utils import check_session
+from app.session_utils import check_session
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
