@@ -8,105 +8,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loleczkowo Video System – User</title>
 
-  <!-- ── minimal, black-and-white styling ── -->
+  <!-- ── black-and-white styling ── -->
   <style>
-    html,body { height:100%; margin:0; background:#fff; color:#000;
-                font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-
-    /* centre main section */
-    body       { display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    html,body{height:100%;margin:0;background:#fff;color:#000;
+              font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    body{display:flex;flex-direction:column;justify-content:center;align-items:center;}
 
     /* auth buttons */
-    .nav       { position:fixed; top:1rem; right:1rem; }
-    .nav .btn  { margin-left:.5rem; padding:.35rem .8rem; font-size:.9rem;
-                 border:1px solid #000; background:#fff; cursor:pointer; }
-    .nav .btn:disabled { opacity:.6; cursor:default; }
+    .nav{position:fixed;top:1rem;right:1rem;}
+    .nav .btn{margin-left:.5rem;padding:.35rem .8rem;font-size:.9rem;
+              border:1px solid #000;background:#fff;cursor:pointer;}
+    .nav .btn:disabled{opacity:.6;cursor:default;}
 
     /* user card */
-    #user-card         { max-width:360px; text-align:center; }
-    #user-card[hidden] { display:none; }
-    #avatar            { width:100px; height:100px; border-radius:50%; margin-bottom:1rem; }
+    #user-card{max-width:360px;text-align:center;}
+    #user-card[hidden]{display:none;}
 
-    dl { text-align:left; margin:1rem auto 0; width:80%; }
-    dt { font-weight:600; }
-    dd { margin:0 0 .6rem 0; }
+    dl{text-align:left;margin:1rem auto 0;width:80%;}
+    dt{font-weight:600;}
+    dd{margin:0 0 .6rem 0;}
   </style>
 </head>
 <body>
 
 <!-- ── auth buttons ── -->
 <nav class="nav">
-  <!-- guest view -->
   <a class="btn" href="verification/login.html"  data-guest>Login</a>
   <a class="btn" href="verification/signup.html" data-guest>Sign&nbsp;up</a>
-
-  <!-- logged-in view -->
   <button class="btn" id="logout-btn" hidden>Logout</button>
 </nav>
 
 <!-- ── user info ── -->
 <section id="user-card" hidden>
-  <img id="avatar" src="/static/img/default-avatar.svg" alt="avatar">
   <h2 id="nickname"></h2>
-
   <dl>
-    <dt>Email</dt>        <dd id="email"></dd>
-    <dt>Is mod</dt>       <dd id="is-mod"></dd>
-    <dt>Blocked since</dt><dd id="blocked-since"></dd>
+    <dt>User&nbsp;ID</dt>     <dd id="user-id"></dd>
+    <dt>Email</dt>           <dd id="email"></dd>
+    <dt>Is&nbsp;mod</dt>      <dd id="is-mod"></dd>
+    <dt>Blocked&nbsp;since</dt><dd id="blocked-since"></dd>
   </dl>
 </section>
 
 <!-- ── logic ── -->
 <script>
-/* delete cookie (logout helper) */
-function clearToken() {
-  document.cookie = 'lvs_token=; Max-Age=0; path=/; SameSite=Lax';
+function clearToken(){
+  document.cookie='lvs_token=; Max-Age=0; path=/; SameSite=Lax';
 }
 
-/* populate UI for a valid session */
-function showUser(u) {
-  document.getElementById('avatar').src           = u.avatar_url || '/static/img/default-avatar.svg';
-  document.getElementById('nickname').textContent = '@' + u.nickname;
-  document.getElementById('email').textContent    = u.email;
-  document.getElementById('is-mod').textContent   = u.is_mod ? 'yes' : 'no';
-  document.getElementById('blocked-since').textContent =
-    u.blocked_since || '—';
+function showUser(u){
+  document.getElementById('nickname').textContent   ='@'+u.nickname;
+  document.getElementById('user-id').textContent    =u.id;
+  document.getElementById('email').textContent      =u.email;
+  document.getElementById('is-mod').textContent     =u.is_mod?'yes':'no';
+  document.getElementById('blocked-since').textContent=u.blocked_since||'—';
 
-  /* toggle elements */
-  document.querySelectorAll('[data-guest]').forEach(el => el.hidden = true);
-  document.getElementById('logout-btn').hidden = false;
-  document.getElementById('user-card').hidden  = false;
+  document.querySelectorAll('[data-guest]').forEach(el=>el.hidden=true);
+  document.getElementById('logout-btn').hidden=false;
+  document.getElementById('user-card').hidden=false;
 }
 
-/* main session check */
-async function testConnection() {
-  try {
-    const response = await fetch('/api/test-connection', {
-      method: 'GET',
-      credentials: 'include'
-    });
-    const data = await response.json();
-
-    if (data.result === 'VALID_SESSION') {
+async function testConnection(){
+  try{
+    const rsp=await fetch('/api/test-connection',{credentials:'include'});
+    const data=await rsp.json();
+    if(data.result==='VALID_SESSION'){
       showUser(data.user);
-    } else {
+    }else{
       clearToken();
-      window.location.href = 'verification/login.html';
+      location.href='verification/login.html';
     }
-  } catch (err) {
-    console.error('Connection error:', err);
-    window.location.href = 'verification/login.html';
+  }catch(err){
+    console.error('Connection error:',err);
+    location.href='verification/login.html';
   }
 }
 
-/* logout click */
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('logout-btn').addEventListener('click', () => {
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('logout-btn').addEventListener('click',()=>{
     clearToken();
-    window.location.href = '/';
+    location.href='/';
   });
   testConnection();
 });
 </script>
 </body>
 </html>
+
