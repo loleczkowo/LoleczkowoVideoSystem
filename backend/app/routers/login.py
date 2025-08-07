@@ -35,8 +35,10 @@ async def login(req: LoginReq):
         user: User | None = res.scalar()
 
         if user is None:
+            logger.debug("ACCOUNT NOT EXIST")
             return {"result": "ACC_NOT_EXIST"}
         if not bcrypt.verify(req.password, user.password_hash):
+            logger.debug("BAD PASSWORD")
             return {"result": "WRONG_PASSWORD"}
 
         raw = secrets.token_hex(32)
@@ -49,4 +51,5 @@ async def login(req: LoginReq):
             last_used=utc_naive_now()
         ))
         await db.commit()
+        logger.debug("GOOD")
         return {"result": "ACC_LOGGED_IN", "token": raw}
