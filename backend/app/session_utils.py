@@ -1,10 +1,10 @@
 import hashlib
-from datetime import datetime, timezone
 from fastapi import HTTPException, status, Request
 from sqlalchemy import select, update
 from app.db import AsyncSessionLocal
 from app.models import Connection, User
 from logging_sys import logger
+from helpers import utc_naive_now
 
 
 async def _hash(token: str) -> str:
@@ -32,7 +32,7 @@ async def check_session(request: Request) -> int:
         await db.execute(
             update(Connection)
             .where(Connection.token_hash == token_hash)
-            .values(last_used=datetime.now(timezone.utc))
+            .values(last_used=utc_naive_now())
         )
         await db.commit()
         logger.debug(f"session found, user: {user_id}")
