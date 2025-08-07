@@ -24,7 +24,7 @@ class log:
         module_str = module_name.ljust(14)
         if G.ansi_text:
             print((f"{ansi.LIGHT_PURPLE}{time_str}  "
-                   f"{lvl_color}{level_str}  "
+                   f"{lvl_color}{level_str}{ansi.RESET}  "
                    f"{ansi.STR}{module_str}{ansi.RESET}  "
                    f"{ansi.BOLD}{ansi.LIGHT_WHITE}||{ansi.RESET}  {text}"))
         else:
