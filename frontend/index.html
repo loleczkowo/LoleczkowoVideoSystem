@@ -82,13 +82,20 @@ async function testConnection(){
   }
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('logout-btn').addEventListener('click',()=>{
-    clearToken();
-    location.href='/';
-  });
+async function serverLogout() {
+  try {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  } finally {
+    location.href = '/';           // or wherever you prefer
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('logout-btn')
+          .addEventListener('click', serverLogout);
   testConnection();
 });
+
 </script>
 </body>
 </html>
