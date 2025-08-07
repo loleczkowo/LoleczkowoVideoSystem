@@ -23,8 +23,9 @@ async def test_connection(request: Request):
             "user": {
                 "id": user.id,
                 "nickname": user.nickname,
+                "display_name": user.display_name,
+                "description": user.description,
                 "email": user.email,
                 "is_mod": user.is_mod,
-                "blocked_since": user.blocked_since.isoformat() if user.blocked_since else None  # noqa: E501 fu flake8 xdx |
             }
         }
