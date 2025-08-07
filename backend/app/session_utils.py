@@ -24,7 +24,7 @@ async def check_session(request: Request) -> int:
         )
         row = res.first()
         if row is None:
-            logger.debug("session invalid")
+            logger.debug("SESSION INVALID")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="invalid session")
 
@@ -36,7 +36,7 @@ async def check_session(request: Request) -> int:
             .values(last_used=utc_naive_now())
         )
         await db.commit()
-        logger.debug(f"session found, user: {user_id}")
+        logger.debug(f"SESSION VALID: {user_id}")
         return user_id
 
 

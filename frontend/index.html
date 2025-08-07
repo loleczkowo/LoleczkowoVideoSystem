@@ -1,33 +1,128 @@
+<!-- TEST FOR CONNECTION, AND YES IK IK ITS BY CHAT GPT BUT IM NOT A FRONTEND DEV -->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Session Test</title>
+  <meta charset="UTF-8">
+  <title>Loleczkowo Video System – User</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    /* ── Basic reset ── */
+    html{box-sizing:border-box}*,*::before,*::after{box-sizing:inherit;margin:0;padding:0}
+    body{font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         background:#fafafa;color:#111}
+
+    /* ── Nav bar ── */
+    header.nav{display:flex;justify-content:space-between;align-items:center;
+               padding:.7rem 1.2rem;background:#141414;color:#fff}
+    header.nav .btn{margin-left:.6rem;padding:.4rem .9rem;border:0;border-radius:.25rem;
+                    cursor:pointer;font-size:.9rem}
+    header.nav .btn:hover{opacity:.85}
+    header.nav .btn.outlined{background:transparent;border:1px solid #fff}
+    header.nav .btn.danger{background:#b62d2d}
+
+    /* ── User card ── */
+    #user-card{display:grid;grid-template-columns:120px 1fr;gap:1.5rem;max-width:640px;
+               margin:2rem auto;padding:1.5rem;border:1px solid #ddd;border-radius:.5rem;background:#fff}
+    #user-card[hidden]{display:none}
+    #user-card .avatar img{width:120px;height:120px;object-fit:cover;border-radius:50%}
+    .muted{color:#666;font-size:.9rem;margin-bottom:1rem}
+    #user-card dl{display:grid;grid-template-columns:120px 1fr;row-gap:.4rem;column-gap:.8rem;margin:0}
+    #user-card dt{font-weight:600}
+    #user-card dd{margin:0}
+  </style>
 </head>
 <body>
-  <script>
-    async function testConnection() {
-      try {
-        const response = await fetch('/api/test-connection', {
-          method: 'GET',
-          credentials: 'include'
-        });
 
-        const data = await response.json();
+<header class="nav">
+  <a class="brand" href="/" style="text-decoration:none;color:#fff;font-weight:700">
+    Loleczkowo Video System
+  </a>
 
-        if (data.result === "VALID_SESSION") {
-          console.log("Session valid:", data.user);
-        } else {
-          window.location.href = "verification/login.html";
-        }
-      } catch (err) {
-        console.error("Connection error:", err);
-        window.location.href = "verification/login.html";
-      }
-    }
+  <nav class="auth-bar">
+    <!-- guest only -->
+    <a class="btn" href="/frontend/verification/login.html" data-auth="guest">Login</a>
+    <a class="btn outlined" href="/frontend/verification/signup.html" data-auth="guest">Sign up</a>
 
-    testConnection();
-  </script>
+    <!-- logged-in only -->
+    <button class="btn danger" id="logout-btn" data-auth="user" hidden>Logout</button>
+  </nav>
+</header>
+
+<section id="user-card" hidden>
+  <div class="avatar">
+    <img id="avatar-img" src="/static/img/default-avatar.svg" alt="User avatar">
+  </div>
+
+  <div class="info">
+    <h2 id="display-name"></h2>
+    <p id="nickname" class="muted"></p>
+
+    <dl>
+      <dt>Email</dt>        <dd id="email"></dd>
+      <dt>Balance</dt>      <dd id="balance"></dd>
+      <dt>Description</dt>  <dd id="description"></dd>
+      <dt>Blocked since</dt><dd id="blocked-since"></dd>
+    </dl>
+  </div>
+</section>
+
+<script>
+/* ── Cookie helper ── */
+function getCookie(name){
+  const m=document.cookie.match('(?:^|; )'+name.replace(/[-[\\]{}()*+?.,\\\\^$|#\\s]/g,'\\\\$&')+'=([^;]*)');
+  return m?decodeURIComponent(m[1]):null;
+}
+
+/* ── UI state switches ── */
+function updateAuthUI(){
+  const token=!!getCookie('lvs_token');
+  document.querySelectorAll('[data-auth="guest"]').forEach(el=>el.hidden = token);
+  document.querySelectorAll('[data-auth="user"]').forEach(el=>el.hidden = !token);
+}
+
+/* ── Log out (delete cookie) ── */
+function logout(){
+  document.cookie='lvs_token=; Max-Age=0; path=/; SameSite=Lax';
+  document.getElementById('user-card').hidden=true;
+  updateAuthUI();
+  location.href='/'; // redirect home; remove if undesired
+}
+
+/* ── Fetch current user ── */
+async function fetchUser(){
+  const token=getCookie('lvs_token');
+  if(!token){updateAuthUI();return;}
+
+  try{
+    const res=await fetch('/api/v1/me',{headers:{Authorization:'Bearer '+token}});
+    if(!res.ok)throw new Error(res.status);
+    const u=await res.json();
+
+    /* Fill UI */
+    document.getElementById('avatar-img').src      =u.avatar_url||'/static/img/default-avatar.svg';
+    document.getElementById('display-name').textContent=u.display_name||u.nickname;
+    document.getElementById('nickname').textContent      ='@'+u.nickname;
+    document.getElementById('email').textContent         =u.email;
+    document.getElementById('balance').textContent       =u.balance??'0';
+    document.getElementById('description').textContent   =u.description||'—';
+    document.getElementById('blocked-since').textContent =u.blocked_since??'—';
+
+    document.getElementById('user-card').hidden=false;
+  }catch(err){
+    console.warn('User fetch failed:',err);
+    logout(); // invalid/expired token
+  }finally{
+    updateAuthUI();
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  fetchUser();
+  document.getElementById('logout-btn').addEventListener('click',logout);
+});
+</script>
+
 </body>
 </html>

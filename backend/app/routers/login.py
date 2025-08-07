@@ -24,7 +24,6 @@ class LoginRes(BaseModel):
 
 @router.post("/login", response_model=LoginRes)
 async def login(req: LoginReq, response: Response):
-    logger.debug("user try to log!")
     async with AsyncSessionLocal() as db:
         res = await db.execute(
             select(User).where(
@@ -35,10 +34,10 @@ async def login(req: LoginReq, response: Response):
         user: User | None = res.scalar()
 
         if user is None:
-            logger.debug("ACCOUNT NOT EXIST")
+            logger.debug("ACC_NOT_EXIST")
             return {"result": "ACC_NOT_EXIST"}
         if not bcrypt.verify(req.password, user.password_hash):
-            logger.debug("BAD PASSWORD")
+            logger.debug("WRONG_PASSWORD")
             return {"result": "WRONG_PASSWORD"}
 
         raw_token = secrets.token_hex(32)
@@ -51,7 +50,6 @@ async def login(req: LoginReq, response: Response):
             last_used=utc_naive_now()
         ))
         await db.commit()
-        logger.debug("GOOD")
         response.set_cookie(
             key="lvs_token",
             value=raw_token,
@@ -59,4 +57,5 @@ async def login(req: LoginReq, response: Response):
             samesite="lax",
             secure=True
         )
+        logger.debug("ACC_LOGGED_IN")
         return {"result": "ACC_LOGGED_IN"}

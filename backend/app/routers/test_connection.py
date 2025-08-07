@@ -9,7 +9,6 @@ router = APIRouter(prefix="/api", tags=["auth"])
 
 @router.get("/test-connection")
 async def test_connection(request: Request):
-    logger.debug("CHECK USER CONNECTION")
     user_id = await check_session(request)
 
     async with AsyncSessionLocal() as db:

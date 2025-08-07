@@ -50,7 +50,6 @@ class SignupReq(BaseModel):
 
 @router.post("/signup")
 async def signup(req: SignupReq):
-    logger.debug("user try to singup!")
     async with AsyncSessionLocal() as db:
         user = User(
             nickname      = req.nickname,
@@ -63,5 +62,7 @@ async def signup(req: SignupReq):
             await db.commit()
         except IntegrityError:
             await db.rollback()
+            logger.debug(f"NICKNAME_OR_EMAIL_TAKEN")
             raise HTTPException(400, "NICKNAME_OR_EMAIL_TAKEN")
+    logger.debug(f"ACC_CREATED ({req.nickname})")
     return {"result": "ACC_CREATED"}

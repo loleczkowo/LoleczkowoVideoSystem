@@ -9,3 +9,5 @@ Max lens:
 Username 25 characters
 Password 64 characters
 Display_name 25 characters
+
+The lvs_token COOKIE is for comunication

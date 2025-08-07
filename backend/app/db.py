@@ -7,7 +7,7 @@ try:
 
     engine = create_async_engine(
         str(settings.pg_dsn),
-        echo=True,  # SET TRUE FOR ONLY DEBUG
+        echo=False,  # SET TRUE FOR ONLY DEBUG
         pool_size=5,
         max_overflow=2,
     )
