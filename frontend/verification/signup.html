@@ -143,7 +143,8 @@ signupForm.addEventListener('submit', async e => {
                 display_name:  displayNameInput.value.trim(),
                 email:         emailInput.value.trim(),
                 password:      signupPassword.value
-            })
+            }),
+            credentials: 'include'
         });
         if (r.ok) {
             signupSuccess.textContent = 'Account created! You can now log in.';

@@ -1,6 +1,6 @@
 import secrets
 import hashlib
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from pydantic import BaseModel
 from passlib.hash import bcrypt
 from sqlalchemy import select
@@ -23,7 +23,7 @@ class LoginRes(BaseModel):
 
 
 @router.post("/login", response_model=LoginRes)
-async def login(req: LoginReq):
+async def login(req: LoginReq, response: Response):
     logger.debug("user try to log!")
     async with AsyncSessionLocal() as db:
         res = await db.execute(
@@ -41,8 +41,8 @@ async def login(req: LoginReq):
             logger.debug("BAD PASSWORD")
             return {"result": "WRONG_PASSWORD"}
 
-        raw = secrets.token_hex(32)
-        token_hash = hashlib.sha256(raw.encode()).hexdigest()
+        raw_token = secrets.token_hex(32)
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
 
         db.add(Connection(
             token_hash=token_hash,
@@ -52,4 +52,11 @@ async def login(req: LoginReq):
         ))
         await db.commit()
         logger.debug("GOOD")
-        return {"result": "ACC_LOGGED_IN", "token": raw}
+        response.set_cookie(
+            key="lvs_token",
+            value=raw_token,
+            httponly=True,
+            samesite="lax",
+            secure=True
+        )
+        return {"result": "ACC_LOGGED_IN"}

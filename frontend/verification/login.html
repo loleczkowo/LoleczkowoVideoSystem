@@ -51,12 +51,12 @@ loginForm.addEventListener('submit', async e => {
             body:JSON.stringify({
                 identifier: loginForm.identifier.value.trim(),
                 password:   loginPassword.value
-            })
+            }),
+            credentials: 'include'
         });
         const obj = await r.json();
 
         if (obj.result === 'ACC_LOGGED_IN') {
-            document.cookie = `lvs_token=${obj.token}; path=/; SameSite=Strict`;  // COOKIES!
             location.href = '/index.html';                  // or wherever
         } else if (obj.result === 'ACC_NOT_EXIST') {
             loginError.textContent = 'Account does not exist.';
