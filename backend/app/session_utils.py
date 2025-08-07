@@ -12,6 +12,7 @@ async def _hash(token: str) -> str:
 
 
 async def check_session(request: Request) -> int:
+
     raw_token = request.cookies.get("lvs_token")
 
     token_hash = await _hash(raw_token)
