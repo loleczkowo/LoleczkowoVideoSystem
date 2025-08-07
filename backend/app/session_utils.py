@@ -15,6 +15,10 @@ async def check_session(request: Request) -> int:
 
     raw_token = request.cookies.get("lvs_token")
 
+    if raw_token is None:
+        logger.debug("NO SIESSION")
+        raise HTTPException(status_code=401, detail="no session")
+
     token_hash = await _hash(raw_token)
 
     async with AsyncSessionLocal() as db:
