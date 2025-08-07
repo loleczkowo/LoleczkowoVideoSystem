@@ -1,6 +1,5 @@
 import secrets
 import hashlib
-import datetime as dt
 from fastapi import APIRouter
 from pydantic import BaseModel
 from passlib.hash import bcrypt
@@ -8,7 +7,7 @@ from sqlalchemy import select
 from app.db import AsyncSessionLocal
 from app.models import User, Connection
 from logging_sys import logger
-
+from helpers import utc_naive_now
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
@@ -46,8 +45,8 @@ async def login(req: LoginReq):
         db.add(Connection(
             token_hash=token_hash,
             user_id=user.id,
-            created_at=dt.datetime.now(dt.timezone.utc),
-            last_used=dt.datetime.now(dt.timezone.utc)
+            created_at=utc_naive_now(),
+            last_used=utc_naive_now()
         ))
         await db.commit()
         return {"result": "ACC_LOGGED_IN", "token": raw}
